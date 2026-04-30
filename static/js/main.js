@@ -218,42 +218,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
-    // 6. Password Toggle
-    const passwordInputs = document.querySelectorAll('input[type="password"]');
-    passwordInputs.forEach(input => {
-        // Create wrapper and icon using Bootstrap 5 input-group
-        const wrapper = document.createElement('div');
-        wrapper.className = 'input-group';
-        
-        // Wrap input
-        input.parentNode.insertBefore(wrapper, input);
-        wrapper.appendChild(input);
-        
-        // Create toggle button
-        const toggleBtn = document.createElement('button');
-        toggleBtn.type = 'button';
-        toggleBtn.className = 'btn btn-outline-secondary d-flex align-items-center justify-content-center';
-        toggleBtn.innerHTML = '<i class="fas fa-eye text-muted"></i>';
-        toggleBtn.style.border = '1px solid #ced4da'; // Match bootstrap input border
-        if (input.classList.contains('is-invalid')) {
-            toggleBtn.style.borderColor = '#dc3545';
-        }
-        
-        wrapper.appendChild(toggleBtn);
-        
-        toggleBtn.addEventListener('click', function() {
-            const icon = this.querySelector('i');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
-        });
-    });
 });
 
 // Global Function outside DOMContentLoaded
