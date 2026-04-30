@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mt-5">
+    <div class="col-md-5 mb-4">
+        <div class="bg-light d-flex align-items-center justify-content-center" style="height: 400px; padding: 2rem;">
+            {% if product.image %}
+            <img src="{{ product.image.url }}" class="img-fluid" alt="{{ product.name }}" style="max-height: 100%; object-fit: contain;">
+            {% else %}
+            <span class="text-muted">no image</span>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-7 px-md-5">
+        <p class="text-uppercase text-muted small mb-1" style="letter-spacing: 1px;">{{ product.category }}</p>
+        <h2 class="fw-bold mb-3" style="color: var(--color-text-main);">{{ product.name }}</h2>
+        <h3 class="mb-4 fw-bold" style="color: var(--color-text-main);">₱ {{ product.price }}</h3>
+        
+        <p style="color: var(--color-text-muted); line-height: 1.6;">{{ product.description }}</p>
+        
+        <div class="my-4">
+            <p class="mb-2 {% if product.stock > 0 %}text-success{% else %}text-danger{% endif %} small text-uppercase">
+                {% if product.stock > 0 %}{{ product.stock }} in stock{% else %}Out of Stock{% endif %}
+            </p>
+        </div>
+
+        <div class="d-flex flex-wrap gap-3 mt-4">
+            {% if user.is_authenticated %}
+                {% if product.stock > 0 %}
+                <form action="{% url 'orders:add_to_cart' product.id %}" method="post" id="product-action-form" class="w-100">
+                    {% csrf_token %}
+                    <div class="d-flex align-items-center mb-4">
+                        <label class="fw-bold me-3 text-muted">Quantity</label>
+                        <div class="d-flex align-items-center justify-content-center border rounded-pill">
+                            <button type="button" class="btn btn-sm px-3 py-2 border-end-0 bg-transparent shadow-none rounded-start-pill text-muted" id="btn-decrease" onclick="let input=document.getElementById('quantity-input'); if(input.value > 1) input.value = parseInt(input.value) - 1;"><i class="fas fa-minus" style="font-size: 0.7rem;"></i></button>
+                            <input type="number" name="quantity" id="quantity-input" value="1" min="1" max="{{ product.stock }}" class="form-control border-0 text-center shadow-none bg-transparent fw-bold" style="width: 50px; -moz-appearance: textfield; padding: 0.25rem;">
+                            <button type="button" class="btn btn-sm px-3 py-2 border-start-0 bg-transparent shadow-none rounded-end-pill text-muted" id="btn-increase" onclick="let input=document.getElementById('quantity-input'); if(input.value < {{ product.stock }}) input.value = parseInt(input.value) + 1;"><i class="fas fa-plus" style="font-size: 0.7rem;"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex flex-wrap gap-3">
+                        <button type="submit" class="btn btn-outline-shop px-4 rounded-pill fw-bold"><i class="fas fa-shopping-cart me-2"></i> Add to Cart</button>
+                        <button type="button" id="buy-now-btn" class="btn btn-solid-shop px-5 rounded-pill fw-bold">Buy Now</button>
+                    </div>
+                </form>
+                <script>
+                    document.getElementById('buy-now-btn').addEventListener('click', function(e) {
+                        e.preventDefault();
+                        let qty = document.getElementById('quantity-input').value;
+                        window.location.href = "{% url 'orders:place_order' product.id %}?quantity=" + qty;
+                    });
+                    
+                    document.getElementById('product-action-form').addEventListener('submit', function(e) {
+                        if (e.submitter && e.submitter.id === 'buy-now-btn') return;
+                        e.preventDefault();
+                        const form = this;
+                        const submitBtn = form.querySelector('button[type="submit"]');
+                        const originalText = submitBtn.innerHTML;
+                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Adding...';
+                        submitBtn.disabled = true;
+                        
+                        fetch(form.action, {
+                            method: 'POST',
+                            body: new FormData(form),
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                        .then(response => {
+                            if (response.redirected) {
+                                window.location.href = response.url;
+                                throw new Error('Redirected');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.redirect) {
+                                window.location.href = data.redirect;
+                                return;
+                            }
+                            if (data.status === 'error') {
+                                alert(data.message || 'An error occurred.');
+                                submitBtn.innerHTML = originalText;
+                                submitBtn.disabled = false;
+                                return;
+                            }
+                            
+                            submitBtn.innerHTML = '<i class="fas fa-check me-2"></i> Added';
+                            submitBtn.classList.remove('btn-outline-shop');
+                            submitBtn.classList.add('btn-success');
+                            
+                            let cartIcon = document.querySelector('.fa-shopping-cart');
+                            if (cartIcon && data.cart_count > 0) {
+                                let badge = cartIcon.nextElementSibling;
+                                if (badge && badge.classList.contains('badge')) {
+                                    badge.innerText = data.cart_count;
+                                } else {
+                                    let newBadge = document.createElement('span');
+                                    newBadge.className = "position-absolute top-0 start-100 translate-middle badge cart-badge bg-danger";
+                                    newBadge.innerText = data.cart_count;
+                                    cartIcon.parentNode.appendChild(newBadge);
+                                }
+                            }
+                            
+                            // Update hover cart content
+                            let hoverCartContent = document.getElementById('hover-cart-content');
+                            if (hoverCartContent && data.cart_html) {
+                                hoverCartContent.innerHTML = data.cart_html;
+                            }
+                            
+                            setTimeout(() => {
+                                submitBtn.innerHTML = originalText;
+                                submitBtn.disabled = false;
+                                submitBtn.classList.remove('btn-success');
+                                submitBtn.classList.add('btn-outline-shop');
+                            }, 2000);
+                        })
+                        .catch(err => {
+                            if (err.message !== 'Redirected') {
+                                submitBtn.innerHTML = originalText;
+                                submitBtn.disabled = false;
+                            }
+                        });
+                    });
+                </script>
+                {% else %}
+                    <button class="btn btn-secondary px-5 py-2 rounded-pill fw-bold" disabled>Out of Stock</button>
+                {% endif %}
+            {% else %}
+                <a href="{% url 'customers:login' %}" class="btn btn-primary-shop rounded-pill fw-bold px-4">Login to Buy</a>
+            {% endif %}
+            
+            {% if user.is_staff %}
+                <div class="w-100 mt-2">
+                    <a href="{% url 'products:product_update' product.id %}" class="btn btn-outline-secondary rounded-pill px-4 fw-bold me-2">Edit</a>
+                    <a href="{% url 'products:product_delete' product.id %}" class="btn btn-outline-danger rounded-pill px-4 fw-bold">Delete</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5 mb-5">
+    <div class="col-12">
+        <hr class="mb-5">
+        <h3 class="fw-bold mb-4" style="color: var(--color-text-main);">Customer Reviews</h3>
+        
+        <div class="row">
+            <div class="col-md-7">
+                {% for review in product.reviews.all %}
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="fw-bold mb-0">{{ review.user.username }}</h6>
+                            <small class="text-muted">{{ review.created_at|date:"M d, Y" }}</small>
+                        </div>
+                        <div class="shop-card-stars mb-2" style="font-size: 0.9rem;">
+                            <i class="{% if review.rating >= 1 %}fas{% else %}far{% endif %} fa-star"></i>
+                            <i class="{% if review.rating >= 2 %}fas{% else %}far{% endif %} fa-star"></i>
+                            <i class="{% if review.rating >= 3 %}fas{% else %}far{% endif %} fa-star"></i>
+                            <i class="{% if review.rating >= 4 %}fas{% else %}far{% endif %} fa-star"></i>
+                            <i class="{% if review.rating >= 5 %}fas{% else %}far{% endif %} fa-star"></i>
+                        </div>
+                        {% if review.comment %}
+                        <p class="mb-0 text-muted">{{ review.comment }}</p>
+                        {% endif %}
+                        
+                        {% if user.is_staff %}
+                        <div class="mt-3 text-end">
+                            <form action="{% url 'products:delete_review' review.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete Review</button>
+                            </form>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted">No reviews yet. Be the first to review this product!</p>
+                {% endfor %}
+            </div>
+            
+            <div class="col-md-5 ps-md-5 mt-4 mt-md-0">
+                <h5 class="fw-bold mb-3">Leave a Review</h5>
+                {% if user.is_authenticated %}
+                <div class="card border-0 bg-light p-4 rounded-4">
+                    <form method="post" action="{% url 'products:product_detail' product.id %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Rating</label>
+                            <div class="rating-stars mb-2" id="interactive-stars">
+                                <i class="fas fa-star active" data-value="1"></i>
+                                <i class="fas fa-star active" data-value="2"></i>
+                                <i class="fas fa-star active" data-value="3"></i>
+                                <i class="fas fa-star active" data-value="4"></i>
+                                <i class="fas fa-star active" data-value="5"></i>
+                            </div>
+                            <input type="hidden" name="rating" id="rating-input" value="5" required>
+                            <div class="text-muted small fw-bold" id="rating-text">5 - Excellent</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Your Review (Optional)</label>
+                            <textarea name="comment" rows="3" class="form-control border-0 shadow-sm" placeholder="Tell us what you think..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-solid-shop w-100">Submit Review</button>
+                    </form>
+                </div>
+                {% else %}
+                <div class="alert alert-secondary border-0">
+                    You must <a href="{% url 'customers:login' %}" class="fw-bold text-dark">login</a> to leave a review.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .rating-stars {
+        display: flex;
+        gap: 0.25rem;
+    }
+    .rating-stars i {
+        color: #e4e5e9;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: color 0.2s, transform 0.2s;
+    }
+    .rating-stars i.active,
+    .rating-stars i.hover {
+        color: #ffc107;
+    }
+    .rating-stars i:hover {
+        transform: scale(1.15);
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const stars = document.querySelectorAll('#interactive-stars i');
+        const ratingInput = document.getElementById('rating-input');
+        const ratingText = document.getElementById('rating-text');
+        
+        const texts = {
+            1: "1 - Poor",
+            2: "2 - Fair",
+            3: "3 - Average",
+            4: "4 - Good",
+            5: "5 - Excellent"
+        };
+
+        stars.forEach(star => {
+            star.addEventListener('mouseover', function() {
+                const value = this.getAttribute('data-value');
+                stars.forEach(s => {
+                    if (s.getAttribute('data-value') <= value) {
+                        s.classList.add('hover');
+                    } else {
+                        s.classList.remove('hover');
+                    }
+                });
+            });
+
+            star.addEventListener('mouseout', function() {
+                stars.forEach(s => s.classList.remove('hover'));
+            });
+
+            star.addEventListener('click', function() {
+                const value = this.getAttribute('data-value');
+                ratingInput.value = value;
+                ratingText.innerText = texts[value];
+                updateStars(value);
+            });
+        });
+
+        function updateStars(value) {
+            stars.forEach(s => {
+                if (s.getAttribute('data-value') <= value) {
+                    s.classList.add('active');
+                } else {
+                    s.classList.remove('active');
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

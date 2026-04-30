@@ -1,0 +1,341 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Promotional Banner -->
+<div class="promo-banner position-relative" style="background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('{% static 'img/photo.avif' %}'); background-size: cover; background-position: center; border-radius: 15px; padding: 4rem 1rem; min-height: 250px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+    <div class="position-absolute text-center" style="z-index: 1;">
+        <h2 class="fw-bold" style="color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Special Offers Just For You!</h2>
+        <p class="text-light" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">High-quality school supplies at unbeatable prices.</p>
+        <button class="btn btn-solid-shop mt-3 px-4 py-2 fw-bold shadow" onclick="document.getElementById('products-section').scrollIntoView({behavior: 'smooth'})">Shop Now</button>
+    </div>
+</div>
+
+<!-- Horizontal Filters -->
+<div class="d-flex flex-wrap gap-3 mb-5 align-items-center justify-content-between">
+    <div class="d-flex flex-wrap gap-2">
+        <div class="dropdown">
+            <button class="filter-pill dropdown-toggle {% if current_category %}active{% endif %}" type="button" data-bs-toggle="dropdown">
+                {{ current_category|default:"Category" }}
+            </button>
+            <ul class="dropdown-menu border-0 shadow">
+                <li><a class="dropdown-item" href="?{% if query %}q={{ query }}{% endif %}{% if current_price %}&price={{ current_price }}{% endif %}{% if current_rating %}&rating={{ current_rating }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">All Categories</a></li>
+                {% for cat in categories %}
+                <li><a class="dropdown-item" href="?category={{ cat }}{% if query %}&q={{ query }}{% endif %}{% if current_price %}&price={{ current_price }}{% endif %}{% if current_rating %}&rating={{ current_rating }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">{{ cat }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <div class="dropdown">
+            <button class="filter-pill dropdown-toggle {% if current_price %}active{% endif %}" type="button" data-bs-toggle="dropdown">
+                Price
+            </button>
+            <ul class="dropdown-menu border-0 shadow">
+                <li><a class="dropdown-item" href="?{% if query %}q={{ query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_rating %}&rating={{ current_rating }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">All Prices</a></li>
+                <li><a class="dropdown-item" href="?price=under_50{% if query %}&q={{ query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_rating %}&rating={{ current_rating }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">Under ₱50</a></li>
+                <li><a class="dropdown-item" href="?price=50_100{% if query %}&q={{ query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_rating %}&rating={{ current_rating }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">₱50 - ₱100</a></li>
+                <li><a class="dropdown-item" href="?price=over_100{% if query %}&q={{ query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_rating %}&rating={{ current_rating }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">Over ₱100</a></li>
+            </ul>
+        </div>
+        
+        <div class="dropdown">
+            <button class="filter-pill dropdown-toggle {% if current_rating %}active{% endif %}" type="button" data-bs-toggle="dropdown">
+                Review
+            </button>
+            <ul class="dropdown-menu border-0 shadow">
+                <li><a class="dropdown-item" href="?{% if query %}q={{ query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_price %}&price={{ current_price }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">All Reviews</a></li>
+                <li><a class="dropdown-item" href="?rating=4_up{% if query %}&q={{ query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_price %}&price={{ current_price }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">4 Stars & Up</a></li>
+                <li><a class="dropdown-item" href="?rating=3_up{% if query %}&q={{ query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_price %}&price={{ current_price }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}">3 Stars & Up</a></li>
+            </ul>
+        </div>
+        
+        <button class="filter-pill bg-white border" type="button" data-bs-toggle="offcanvas" data-bs-target="#filtersOffcanvas">
+            <i class="fas fa-sliders-h me-1"></i> All Filters
+        </button>
+    </div>
+    
+    <div class="dropdown">
+        <button class="filter-pill bg-white border dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            Sort by
+        </button>
+        <ul class="dropdown-menu border-0 shadow">
+            <li><a class="dropdown-item" href="?sort=price_asc{% if query %}&q={{ query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_price %}&price={{ current_price }}{% endif %}{% if current_rating %}&rating={{ current_rating }}{% endif %}">Price: Low to High</a></li>
+            <li><a class="dropdown-item" href="?sort=price_desc{% if query %}&q={{ query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_price %}&price={{ current_price }}{% endif %}{% if current_rating %}&rating={{ current_rating }}{% endif %}">Price: High to Low</a></li>
+            <li><a class="dropdown-item" href="?sort=rating_desc{% if query %}&q={{ query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_price %}&price={{ current_price }}{% endif %}{% if current_rating %}&rating={{ current_rating }}{% endif %}">Top Rated</a></li>
+            <li><a class="dropdown-item" href="?sort=name_asc{% if query %}&q={{ query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_price %}&price={{ current_price }}{% endif %}{% if current_rating %}&rating={{ current_rating }}{% endif %}">Name: A-Z</a></li>
+        </ul>
+    </div>
+</div>
+
+<h3 id="products-section" class="fw-bold mb-4" style="color: var(--color-text-main);">Supplies For You!</h3>
+
+<!-- Product Grid -->
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mb-5">
+    {% for product in page_obj %}
+    <div class="col">
+        <div class="card shop-card h-100">
+            <a href="{{ product.get_absolute_url }}" class="text-decoration-none">
+                <div class="shop-card-img-wrap">
+                    {% if user.is_authenticated and not user.is_staff %}
+                    <form action="{% url 'products:toggle_wishlist' product.id %}" method="post" class="position-absolute wishlist-form" style="top: 15px; right: 15px; z-index: 10;">
+                        {% csrf_token %}
+                        <button type="submit" class="border-0 p-0 m-0 bg-transparent">
+                            <div class="shop-card-heart {% if product.id in wishlisted_product_ids %}text-danger{% endif %}" style="position: static;">
+                                <i class="{% if product.id in wishlisted_product_ids %}fas{% else %}far{% endif %} fa-heart"></i>
+                            </div>
+                        </button>
+                    </form>
+                    {% elif not user.is_authenticated %}
+                    <div class="shop-card-heart" style="top: 15px; right: 15px; position: absolute;" onclick="window.location.href='{% url 'customers:login' %}'">
+                        <i class="far fa-heart"></i>
+                    </div>
+                    {% endif %}
+                    
+                    {% if product.image %}
+                    <img src="{{ product.image.url }}" class="shop-card-img" alt="{{ product.name }}">
+                    {% else %}
+                    <div class="shop-card-img d-flex align-items-center justify-content-center bg-light text-muted">
+                        <i class="fas fa-image fs-1"></i>
+                    </div>
+                    {% endif %}
+                </div>
+            </a>
+            <div class="shop-card-body px-2">
+                <div class="d-flex justify-content-between align-items-start mb-1">
+                    <h5 class="shop-card-title text-truncate pe-2" title="{{ product.name }}">{{ product.name }}</h5>
+                    <span class="shop-card-price">₱{{ product.price }}</span>
+                </div>
+                <p class="shop-card-desc">{{ product.category }}</p>
+                <div class="shop-card-stars">
+                    <i class="{% if product.rating >= 1 %}fas{% elif product.rating >= 0.5 %}fas fa-star-half-alt{% else %}far{% endif %} fa-star"></i>
+                    <i class="{% if product.rating >= 2 %}fas{% elif product.rating >= 1.5 %}fas fa-star-half-alt{% else %}far{% endif %} fa-star"></i>
+                    <i class="{% if product.rating >= 3 %}fas{% elif product.rating >= 2.5 %}fas fa-star-half-alt{% else %}far{% endif %} fa-star"></i>
+                    <i class="{% if product.rating >= 4 %}fas{% elif product.rating >= 3.5 %}fas fa-star-half-alt{% else %}far{% endif %} fa-star"></i>
+                    <i class="{% if product.rating >= 5 %}fas{% elif product.rating >= 4.5 %}fas fa-star-half-alt{% else %}far{% endif %} fa-star"></i>
+                    <span class="text-muted ms-1" style="font-size: 0.7rem;">({{ product.reviews_count }})</span>
+                </div>
+                
+                {% if user.is_authenticated %}
+                    {% if product.stock > 0 %}
+                    <div class="d-flex gap-2 w-100">
+                        <form action="{% url 'orders:add_to_cart' product.id %}" method="post" class="w-50 m-0 p-0 ajax-add-to-cart">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-secondary w-100 rounded-pill fw-semibold" style="font-size: 0.8rem; padding: 0.4rem 0.5rem;" title="Add to Cart">Add to Cart</button>
+                        </form>
+                        <form action="{% url 'orders:place_order' product.id %}" method="get" class="w-50 m-0 p-0">
+                            <button type="submit" class="btn btn-outline-secondary w-100 rounded-pill fw-semibold" style="font-size: 0.8rem; padding: 0.4rem 0.5rem;">Buy</button>
+                        </form>
+                    </div>
+                    {% else %}
+                    <button class="btn btn-primary-shop text-muted w-100" disabled>Out of Stock</button>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'customers:login' %}" class="btn btn-primary-shop d-block text-center w-100">Login to Buy</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 mt-5 text-center w-100">
+        <i class="fas fa-box-open fs-1 text-muted mb-3"></i>
+        <p class="text-muted fs-5">No products found.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<nav class="mt-5">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link text-dark" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}">Previous</a></li>
+        {% endif %}
+        
+        {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+            <a class="page-link" {% if page_obj.number == num %}style="background-color: var(--color-primary); border-color: var(--color-primary); color: white;"{% else %}style="color: var(--color-text-main);"{% endif %} href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}">{{ num }}</a>
+        </li>
+        {% endfor %}
+        
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link text-dark" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}">Next</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+<!-- All Filters Offcanvas -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title fw-bold" id="filtersOffcanvasLabel" style="color: var(--color-text-main);">All Filters</h5>
+        <button type="button" class="btn-close shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form action="{% url 'products:product_list' %}" method="get">
+            {% if request.GET.q %}
+            <input type="hidden" name="q" value="{{ request.GET.q }}">
+            {% endif %}
+            
+            <div class="mb-4">
+                <h6 class="fw-bold mb-3">Category</h6>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="category" id="catAll" value="" {% if not current_category %}checked{% endif %}>
+                    <label class="form-check-label" for="catAll">All Categories</label>
+                </div>
+                {% for cat in categories %}
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="category" id="cat{{ forloop.counter }}" value="{{ cat }}" {% if current_category == cat %}checked{% endif %}>
+                    <label class="form-check-label" for="cat{{ forloop.counter }}">{{ cat }}</label>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="mb-4">
+                <h6 class="fw-bold mb-3">Price</h6>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="price" id="priceAll" value="" {% if not current_price %}checked{% endif %}>
+                    <label class="form-check-label" for="priceAll">Any Price</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="price" id="price1" value="under_50" {% if current_price == 'under_50' %}checked{% endif %}>
+                    <label class="form-check-label" for="price1">Under ₱50</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="price" id="price2" value="50_100" {% if current_price == '50_100' %}checked{% endif %}>
+                    <label class="form-check-label" for="price2">₱50 to ₱100</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="price" id="price3" value="over_100" {% if current_price == 'over_100' %}checked{% endif %}>
+                    <label class="form-check-label" for="price3">Over ₱100</label>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <h6 class="fw-bold mb-3">Customer Review</h6>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="rating" id="ratingAll" value="" {% if not current_rating %}checked{% endif %}>
+                    <label class="form-check-label" for="ratingAll">Any Rating</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="rating" id="rating4" value="4_up" {% if current_rating == '4_up' %}checked{% endif %}>
+                    <label class="form-check-label" for="rating4"><i class="fas fa-star" style="color: var(--color-star);"></i><i class="fas fa-star" style="color: var(--color-star);"></i><i class="fas fa-star" style="color: var(--color-star);"></i><i class="fas fa-star" style="color: var(--color-star);"></i><i class="far fa-star" style="color: var(--color-star);"></i> & Up</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="rating" id="rating3" value="3_up" {% if current_rating == '3_up' %}checked{% endif %}>
+                    <label class="form-check-label" for="rating3"><i class="fas fa-star" style="color: var(--color-star);"></i><i class="fas fa-star" style="color: var(--color-star);"></i><i class="fas fa-star" style="color: var(--color-star);"></i><i class="far fa-star" style="color: var(--color-star);"></i><i class="far fa-star" style="color: var(--color-star);"></i> & Up</label>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-solid-shop w-100">Show Results</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const addToCartForms = document.querySelectorAll('.ajax-add-to-cart');
+        addToCartForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Adding...';
+                submitBtn.disabled = true;
+                
+                fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                        throw new Error('Redirected');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                        return;
+                    }
+                    if (data.status === 'error') {
+                        alert(data.message || 'An error occurred.');
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                        return;
+                    }
+                    if (data.status === 'success') {
+                        // Create a toast notification
+                        const toastHtml = `
+                            <div class="toast align-items-center text-bg-success border-0 position-fixed top-0 end-0 m-3" role="alert" aria-live="assertive" aria-atomic="true" style="z-index: 1050;">
+                                <div class="d-flex">
+                                    <div class="toast-body">
+                                        <i class="fas fa-check-circle me-2"></i> ${data.message}
+                                    </div>
+                                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                                </div>
+                            </div>
+                        `;
+                        document.body.insertAdjacentHTML('beforeend', toastHtml);
+                        const toastElement = document.body.lastElementChild;
+                        const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
+                        toast.show();
+                        
+                        // Clean up toast after hidden
+                        toastElement.addEventListener('hidden.bs.toast', () => {
+                            toastElement.remove();
+                        });
+                        
+                        // Update cart badge
+                        let cartIcon = document.querySelector('.fa-shopping-cart');
+                        if (cartIcon && data.cart_count > 0) {
+                            let badge = cartIcon.nextElementSibling;
+                            if (badge && badge.classList.contains('badge')) {
+                                badge.innerText = data.cart_count;
+                            } else {
+                                let newBadge = document.createElement('span');
+                                newBadge.className = 'position-absolute top-0 start-100 translate-middle badge cart-badge bg-danger';
+                                newBadge.innerText = data.cart_count;
+                                cartIcon.parentNode.appendChild(newBadge);
+                            }
+                        }
+                        
+                        // Update hover cart content
+                        let hoverCartContent = document.getElementById('hover-cart-content');
+                        if (hoverCartContent && data.cart_html) {
+                            hoverCartContent.innerHTML = data.cart_html;
+                        }
+                    } else if (data.status === 'error') {
+                        if (data.redirect) {
+                            window.location.href = data.redirect;
+                        } else {
+                            alert(data.message);
+                        }
+                    }
+                    
+                    submitBtn.innerHTML = '<i class="fas fa-check me-1"></i> Added';
+                    submitBtn.classList.remove('btn-outline-secondary');
+                    submitBtn.classList.add('btn-success', 'text-white');
+                    
+                    setTimeout(() => {
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('btn-success', 'text-white');
+                        submitBtn.classList.add('btn-outline-secondary');
+                    }, 2000);
+                })
+                .catch(err => {
+                    if (err.message !== 'Redirected') {
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
+                    }
+                });
+            });
+        });
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row justify-content-center mb-5">
+    <div class="col-md-8 col-lg-6">
+        <div class="mb-3">
+            <a href="{% url 'orders:delivery_dashboard' %}" class="text-decoration-none text-muted fw-bold"><i class="fas fa-arrow-left me-1"></i> Back to Dashboard</a>
+        </div>
+        
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="card-header bg-primary text-white border-0 py-3 text-center">
+                <h5 class="fw-bold mb-0">Scan Receipt QR Code</h5>
+                <p class="small mb-0 text-white-50">Order #ORD-{{ order.id|stringformat:"05d" }}</p>
+            </div>
+            <div class="card-body p-4 text-center">
+                
+                <div id="reader-container" class="mb-4">
+                    <div id="reader" style="width: 100%; border-radius: 12px; overflow: hidden; border: 2px solid var(--color-border);"></div>
+                </div>
+                
+                <div id="success-container" class="d-none py-5">
+                    <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                    <h4 class="fw-bold text-success mb-2">Scan Successful!</h4>
+                    <p class="text-muted" id="success-message">Order has been marked as completed.</p>
+                    <a href="{% url 'orders:delivery_dashboard' %}" class="btn btn-solid-shop mt-3 px-4 rounded-pill">Return to Dashboard</a>
+                </div>
+                
+                <div class="alert alert-info border-0 rounded-3 mb-0 text-start" id="instruction-box">
+                    <div class="d-flex">
+                        <i class="fas fa-info-circle fs-4 me-3 text-info"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1">Instructions</h6>
+                            <p class="small mb-0">Allow camera access if prompted. Point your camera at the QR code on the student's receipt to verify and complete this delivery.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-danger border-0 rounded-3 mt-3 d-none" id="error-message">
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include html5-qrcode library -->
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const html5QrCode = new Html5Qrcode("reader");
+        const orderId = "{{ order.id }}";
+        const completeUrl = "{% url 'orders:delivery_complete' order.id %}";
+        const csrfToken = "{{ csrf_token }}";
+        
+        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+        let scanning = true;
+        
+        // Setup success callback
+        const onScanSuccess = (decodedText, decodedResult) => {
+            if (!scanning) return;
+            scanning = false; // Prevent multiple scans
+            
+            // Stop scanner visual
+            html5QrCode.stop().then((ignore) => {
+                // Send AJAX request to complete order
+                fetch(completeUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ qr_data: decodedText })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        document.getElementById('reader-container').classList.add('d-none');
+                        document.getElementById('instruction-box').classList.add('d-none');
+                        document.getElementById('error-message').classList.add('d-none');
+                        
+                        document.getElementById('success-container').classList.remove('d-none');
+                        document.getElementById('success-message').textContent = data.message;
+                    } else {
+                        // Show error and resume scanning
+                        const errorEl = document.getElementById('error-message');
+                        errorEl.textContent = data.message;
+                        errorEl.classList.remove('d-none');
+                        
+                        setTimeout(() => {
+                            errorEl.classList.add('d-none');
+                            scanning = true;
+                            startScanner();
+                        }, 3000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    scanning = true;
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        };
+
+        const onScanFailure = (error) => {
+            // handle scan failure, usually better to ignore and keep scanning.
+            // console.warn(`Code scan error = ${error}`);
+        };
+
+        function startScanner() {
+            html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure)
+            .catch((err) => {
+                console.error("Error starting scanner:", err);
+                const errorEl = document.getElementById('error-message');
+                errorEl.textContent = "Camera access denied or device has no camera. Please allow camera permissions.";
+                errorEl.classList.remove('d-none');
+            });
+        }
+        
+        startScanner();
+    });
+</script>
+{% endblock %}

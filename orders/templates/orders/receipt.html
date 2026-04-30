@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center my-5">
+    <div class="col-md-7 col-lg-6">
+        <!-- Print Trigger -->
+        <div class="text-end mb-3 d-print-none">
+            <button onclick="window.print()" class="btn btn-outline-secondary btn-sm"><i class="fas fa-print me-1"></i> Print Receipt</button>
+        </div>
+        
+        <div class="card border-1 shadow-sm" style="border-radius: 12px; border-color: #e0e0e0; border-top: 5px solid var(--color-primary);">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <i class="fas fa-graduation-cap fa-3x mb-2 text-dark"></i>
+                    <h3 class="fw-bold mb-0">Jose Maria College</h3>
+                    <p class="text-muted text-uppercase small letter-spacing-1">School Supply Store | Official Receipt</p>
+                </div>
+                
+                <hr class="border-secondary opacity-25">
+                
+                <div class="d-flex justify-content-between mb-4 mt-4">
+                    <div>
+                        <p class="mb-1 text-muted small text-uppercase">Order Type</p>
+                        <h6 class="fw-bold">{{ order.order_type }}</h6>
+                    </div>
+                    <div class="text-end">
+                        <p class="mb-1 text-muted small text-uppercase">Receipt No.</p>
+                        <h6 class="fw-bold text-primary">#ORD-{{ order.id|stringformat:"05d" }}</h6>
+                    </div>
+                </div>
+
+                <div class="bg-light p-3 rounded mb-4">
+                    <p class="mb-1 text-muted small text-uppercase">Student Information</p>
+                    <h6 class="fw-bold mb-1">{{ order.customer.user.first_name }} {% if order.customer.middle_name %}{{ order.customer.middle_name }} {% endif %}{{ order.customer.user.last_name }}</h6>
+                    <p class="mb-0 text-dark small">{{ order.customer.student_id }} | {{ order.customer.course }}</p>
+                </div>
+                
+                {% if order.order_type == 'Room Delivery' or order.delivery_details %}
+                <div class="bg-light p-3 rounded mb-4">
+                    <p class="mb-1 text-muted small text-uppercase">{% if order.order_type == 'Room Delivery' %}Delivery Information{% else %}Additional Details{% endif %}</p>
+                    
+                    {% if order.order_type == 'Room Delivery' %}
+                    <h6 class="fw-bold mb-1">Room: {{ order.room_number }}</h6>
+                    {% if order.want_it_now %}
+                    <p class="mb-1 text-dark small">Time: As soon as possible</p>
+                    {% else %}
+                    <p class="mb-1 text-dark small">Scheduled: {{ order.delivery_date|date:"M d, Y" }} at {{ order.delivery_time|time:"h:i A" }}</p>
+                    {% endif %}
+                    {% endif %}
+                    
+                    {% if order.delivery_details %}
+                    <p class="mb-0 text-dark small mt-1"><strong>Note:</strong> {{ order.delivery_details }}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-2">Item Summary ({{ order.items.count }} items)</h6>
+                    <div class="table-responsive bg-light p-3 rounded">
+                        <table class="table table-borderless table-sm mb-0">
+                            <tbody>
+                                {% for item in order.items.all %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if item.product.image %}
+                                            <img src="{{ item.product.image.url }}" class="rounded me-2" alt="{{ item.product.name }}" style="width: 30px; height: 30px; object-fit: cover;">
+                                            {% else %}
+                                            <div class="rounded me-2 bg-white text-muted d-flex align-items-center justify-content-center shadow-sm" style="width: 30px; height: 30px;">
+                                                <i class="fas fa-box" style="font-size: 0.8rem;"></i>
+                                            </div>
+                                            {% endif %}
+                                            <span class="fw-bold" style="font-size: 0.9rem;">{{ item.product.name }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-center align-middle" style="font-size: 0.9rem;">{{ item.quantity }}x</td>
+                                    <td class="text-end fw-bold align-middle" style="font-size: 0.9rem;">₱{{ item.get_total_price }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <table class="table table-borderless mb-4">
+                    <tbody>
+                        {% if order.order_type == 'Room Delivery' %}
+                        <tr>
+                            <td colspan="2" class="text-muted text-end small pt-0 pb-3">Delivery Fee</td>
+                            <td class="text-end small pt-0 pb-3">₱ {{ order.delivery_fee }}</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                    <tfoot class="border-top">
+                        <tr>
+                            <td colspan="2" class="text-end fw-bold py-3">Total Payable</td>
+                            <td class="text-end fw-bold fs-5 text-primary py-3">₱ {{ order.total_price }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <div class="alert {% if order.order_type == 'Room Delivery' %}alert-info{% else %}alert-success{% endif %} border-0 mb-0 d-print-none">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="{% if order.order_type == 'Room Delivery' %}fas fa-truck{% else %}fas fa-store{% endif %} fs-4 me-2"></i>
+                        <h6 class="fw-bold mb-0">Instructions</h6>
+                    </div>
+                    {% if order.order_type == 'Room Delivery' %}
+                        <p class="small mb-1">Your item will be delivered to your room{% if order.room_number %}: <strong>{{ order.room_number }}</strong>{% endif %}.</p>
+                        {% if order.want_it_now %}
+                        <p class="small mb-0"><strong>Requested Time:</strong> AS SOON AS POSSIBLE</p>
+                        {% else %}
+                        <p class="small mb-0"><strong>Scheduled:</strong> {{ order.delivery_date|date:"M d, Y" }} at {{ order.delivery_time|time:"h:i A" }}</p>
+                        {% endif %}
+                    {% else %}
+                        <p class="small mb-1">Please proceed to the physical store on campus to finalize your payment and pick up your reservation.</p>
+                        <p class="small mb-0"><strong>Claim Before:</strong> {{ claim_date|date:"F d, Y (l)" }}</p>
+                    {% endif %}
+                    
+                    {% if order.delivery_details %}
+                    <hr class="my-2 border-secondary opacity-25">
+                    <p class="small mb-0"><strong>Note:</strong> {{ order.delivery_details }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="text-center mt-5">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=ORD-{{ order.id }}" alt="QR Code" class="mb-2 opacity-75">
+                    <p class="small text-muted mb-0">Scan at the counter</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4 d-print-none">
+            <a href="{% url 'products:product_list' %}" class="text-decoration-none fw-bold"><i class="fas fa-arrow-left me-1"></i> Continue Shopping</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

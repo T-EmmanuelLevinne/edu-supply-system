@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 text-center">
+        <h2 class="fw-bold mb-0">Delivery Staff Portal</h2>
+        <p class="text-muted">Manage incoming and active deliveries</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+                <h5 class="fw-bold text-primary mb-0"><i class="fas fa-box-open me-2"></i> Pending Orders</h5>
+                <p class="text-muted small">Orders waiting to be accepted</p>
+            </div>
+            <div class="card-body">
+                {% if pending_orders %}
+                <div class="list-group list-group-flush">
+                    {% for order in pending_orders %}
+                    <div class="list-group-item px-0 py-3 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold">#ORD-{{ order.id|stringformat:"05d" }}</span>
+                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2">{{ order.get_order_type_display }}</span>
+                        </div>
+                        <p class="mb-1 text-dark small fw-semibold"><i class="far fa-user me-1 text-muted"></i> {{ order.customer.user.first_name }} {{ order.customer.user.last_name }}</p>
+                        {% if order.order_type == 'Room Delivery' %}
+                        <p class="mb-2 text-dark small"><i class="fas fa-map-marker-alt me-1 text-danger"></i> Room {{ order.room_number|default:"N/A" }}</p>
+                        {% endif %}
+                        <p class="mb-2 text-muted small"><i class="far fa-clock me-1"></i> Ordered {{ order.order_date|timesince }} ago</p>
+                        
+                        <div class="d-flex gap-2 mt-2">
+                            <form action="{% url 'orders:delivery_accept' order.id %}" method="post" class="w-50">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-solid-shop btn-sm w-100"><i class="fas fa-check-circle me-1"></i> Accept</button>
+                            </form>
+                            <form action="{% url 'orders:delivery_cancel' order.id %}" method="post" class="w-50">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger btn-sm w-100" onclick="return confirm('Cancel this order?');"><i class="fas fa-times-circle me-1"></i> Cancel</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-clipboard-check fa-3x text-muted mb-3 opacity-25"></i>
+                    <h6 class="text-muted">No pending orders</h6>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6 mb-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+                <h5 class="fw-bold text-success mb-0"><i class="fas fa-truck me-2"></i> My Active Deliveries</h5>
+                <p class="text-muted small">Orders you have accepted to deliver</p>
+            </div>
+            <div class="card-body">
+                {% if my_processing_orders %}
+                <div class="list-group list-group-flush">
+                    {% for order in my_processing_orders %}
+                    <div class="list-group-item px-0 py-3 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold">#ORD-{{ order.id|stringformat:"05d" }}</span>
+                            <span class="badge bg-info text-dark rounded-pill px-3 py-2">Processing</span>
+                        </div>
+                        <p class="mb-1 text-dark small fw-semibold"><i class="far fa-user me-1 text-muted"></i> {{ order.customer.user.first_name }} {{ order.customer.user.last_name }}</p>
+                        {% if order.order_type == 'Room Delivery' %}
+                        <p class="mb-2 text-dark small"><i class="fas fa-map-marker-alt me-1 text-danger"></i> Room {{ order.room_number|default:"N/A" }}</p>
+                        {% endif %}
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="fw-bold text-primary">₱{{ order.total_price }}</span>
+                            <div class="d-flex gap-2">
+                                <form action="{% url 'orders:delivery_cancel' order.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="return confirm('Cancel this delivery?');"><i class="fas fa-times me-1"></i> Cancel</button>
+                                </form>
+                                <a href="{% url 'orders:delivery_scan' order.id %}" class="btn btn-outline-primary btn-sm rounded-pill px-3"><i class="fas fa-qrcode me-1"></i> Scan QR Code</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-box fa-3x text-muted mb-3 opacity-25"></i>
+                    <h6 class="text-muted">No active deliveries</h6>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

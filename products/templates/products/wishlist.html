@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
+    <h3 class="fw-bold m-0" style="color: var(--color-text-main);">My Wishlist</h3>
+    <a href="{% url 'products:product_list' %}" class="btn btn-outline-secondary btn-sm align-self-start align-self-sm-auto">Continue Shopping</a>
+</div>
+
+{% if products %}
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mb-5">
+    {% for product in products %}
+    <div class="col">
+        <div class="card shop-card h-100">
+            <a href="{{ product.get_absolute_url }}" class="text-decoration-none">
+                <div class="shop-card-img-wrap">
+                    <form action="{% url 'products:toggle_wishlist' product.id %}" method="post"
+                        class="position-absolute wishlist-form" style="top: 15px; right: 15px; z-index: 10;">
+                        {% csrf_token %}
+                        <button type="submit" class="border-0 p-0 m-0 bg-transparent">
+                            <div class="shop-card-heart text-danger" style="position: static;">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                        </button>
+                    </form>
+
+                    {% if product.image %}
+                    <img src="{{ product.image.url }}" class="shop-card-img" alt="{{ product.name }}">
+                    {% else %}
+                    <div class="shop-card-img d-flex align-items-center justify-content-center bg-light text-muted">
+                        <i class="fas fa-image fs-1"></i>
+                    </div>
+                    {% endif %}
+                </div>
+            </a>
+            <div class="shop-card-body px-2">
+                <div class="d-flex justify-content-between align-items-start mb-1">
+                    <h5 class="shop-card-title text-truncate pe-2" title="{{ product.name }}">{{ product.name }}</h5>
+                    <span class="shop-card-price">₱{{ product.price }}</span>
+                </div>
+                <p class="shop-card-desc">{{ product.category }}</p>
+                <div class="shop-card-stars">
+                    <i
+                        class="{% if product.rating >= 1 %}fas{% elif product.rating >= 0.5 %}fas fa-star-half-alt{% else %}far{% endif %} fa-star"></i>
+                    <i
+                        class="{% if product.rating >= 2 %}fas{% elif product.rating >= 1.5 %}fas fa-star-half-alt{% else %}far{% endif %} fa-star"></i>
+                    <i
+                        class="{% if product.rating >= 3 %}fas{% elif product.rating >= 2.5 %}fas fa-star-half-alt{% else %}far{% endif %} fa-star"></i>
+                    <i
+                        class="{% if product.rating >= 4 %}fas{% elif product.rating >= 3.5 %}fas fa-star-half-alt{% else %}far{% endif %} fa-star"></i>
+                    <i
+                        class="{% if product.rating >= 5 %}fas{% elif product.rating >= 4.5 %}fas fa-star-half-alt{% else %}far{% endif %} fa-star"></i>
+                    <span class="text-muted ms-1" style="font-size: 0.7rem;">({{ product.reviews_count }})</span>
+                </div>
+
+                {% if product.stock > 0 %}
+                <form action="{% url 'orders:place_order' product.id %}" method="get" class="m-0 p-0">
+                    <button type="submit" class="btn btn-primary-shop">Add to Cart</button>
+                </form>
+                {% else %}
+                <button class="btn btn-primary-shop text-muted" disabled>Out of Stock</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center w-100 py-5">
+    <i class="far fa-heart fs-1 text-muted mb-3"></i>
+    <p class="text-muted fs-5">Your wishlist is empty.</p>
+    <a href="{% url 'products:product_list' %}" class="btn btn-solid-shop mt-3">Browse Products</a>
+</div>
+{% endif %}
+{% endblock %}

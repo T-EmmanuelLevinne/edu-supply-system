@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center my-5">
+    <div class="col-md-10 bg-light p-5 rounded-4 shadow-sm">
+        <h2 class="fw-bold mb-4" style="color: var(--color-primary);">Delivery Information</h2>
+        
+        <h4 class="fw-bold mt-4">Shipping Policies</h4>
+        <p>At EduSupply, we partner with top logistics providers to ensure your school supplies arrive safely and on time. We currently ship nationwide.</p>
+        
+        <h4 class="fw-bold mt-4">Average Delivery Timelines</h4>
+        <ul>
+            <li><strong>Metro Areas:</strong> 1-3 Business Days</li>
+            <li><strong>Provincial Areas:</strong> 3-7 Business Days</li>
+            <li><strong>Remote Islands:</strong> 7-14 Business Days</li>
+        </ul>
+        
+        <h4 class="fw-bold mt-4">Our Couriers</h4>
+        <p>We work exclusively with J&T Express, LBC, and GoGo Xpress for guaranteed secure delivery. Tracking numbers will automatically be updated in your Orders tab.</p>
+        
+        <h4 class="fw-bold mt-4">Return Policy</h4>
+        <p>Not satisfied? Please contact our support team within 7 days of receiving your item. Items must be unopened and in original condition.</p>
+        
+        <a href="{% url 'products:product_list' %}" class="btn btn-solid-shop mt-4">Continue Shopping</a>
+    </div>
+</div>
+{% endblock %}

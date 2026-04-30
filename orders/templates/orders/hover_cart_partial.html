@@ -1,0 +1,55 @@
+<div class="hover-cart-header">
+    <span class="text-muted small fw-bold">{{ cart_item_count|default:0 }} (ITEMS) IN CART</span>
+    <span class="fw-bold text-primary">SUBTOTAL: ₱{{ cart.get_total_price|default:"0.00" }}</span>
+</div>
+
+{% if cart and cart.items.count > 0 %}
+<div class="hover-cart-items">
+    {% for item in cart.items.all %}
+    <div class="hover-cart-item">
+        {% if item.product.image %}
+        <img src="{{ item.product.image.url }}" class="hover-cart-item-img">
+        {% else %}
+        <div class="hover-cart-item-img d-flex align-items-center justify-content-center text-muted"><i class="fas fa-box"></i></div>
+        {% endif %}
+        <div class="hover-cart-item-details">
+            <div class="hover-cart-item-title">
+                <span>{{ item.product.name }}</span>
+                <form action="{% url 'orders:remove_from_cart' item.id %}" method="post" class="d-inline ajax-cart-remove">
+                    {% csrf_token %}
+                    <button type="submit" class="hover-cart-item-remove"><i class="fas fa-times"></i></button>
+                </form>
+            </div>
+            <div class="text-muted small mb-2 text-truncate" style="max-width: 150px;">{{ item.product.description|default:"No description" }}</div>
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="hover-cart-item-price">₱{{ item.get_total_price }}</span>
+                
+                <div class="d-flex align-items-center justify-content-center border rounded-pill">
+                    <a href="{% url 'orders:update_cart_item' item.id 'decrease' %}" class="btn btn-sm px-2 py-1 border-end-0 bg-transparent shadow-none rounded-start-pill text-muted d-flex align-items-center ajax-cart-update"><i class="fas fa-minus" style="font-size: 0.6rem;"></i></a>
+                    <input type="text" class="form-control border-0 text-center shadow-none bg-transparent fw-bold p-0" style="width: 30px; font-size: 0.85rem;" value="{{ item.quantity }}" readonly>
+                    <a href="{% url 'orders:update_cart_item' item.id 'increase' %}" class="btn btn-sm px-2 py-1 border-start-0 bg-transparent shadow-none rounded-end-pill text-muted d-flex align-items-center ajax-cart-update"><i class="fas fa-plus" style="font-size: 0.6rem;"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<div class="hover-cart-footer">
+    <div class="d-flex justify-content-between mb-3">
+        <span class="text-muted fw-bold">SUBTOTAL</span>
+        <span class="fw-bold text-primary fs-5">₱{{ cart.get_total_price }}</span>
+    </div>
+    <form action="{% url 'orders:cart_checkout_page' %}" method="post">
+        {% csrf_token %}
+        {% for item in cart.items.all %}
+        <input type="hidden" name="selected_items" value="{{ item.id }}">
+        {% endfor %}
+        <button type="submit" class="btn btn-solid-shop w-100 text-uppercase">Checkout now</button>
+    </form>
+</div>
+{% else %}
+<div class="p-4 text-center">
+    <i class="fas fa-shopping-cart fa-3x text-muted mb-3 opacity-25"></i>
+    <p class="text-muted mb-0">Your cart is empty</p>
+</div>
+{% endif %}

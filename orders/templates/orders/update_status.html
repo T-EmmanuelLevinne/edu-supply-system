@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h3 class="fw-bold mb-4">Update Order #{{ order.id }}</h3>
+                <div class="mb-4">
+                    <p class="mb-1"><strong>Customer:</strong> {{ order.customer.user.username }}</p>
+                    <p class="mb-1"><strong>Product:</strong> {{ order.product.name }}</p>
+                    <p class="mb-1"><strong>Quantity:</strong> {{ order.quantity }}</p>
+                    <p class="mb-0"><strong>Total Price:</strong> ${{ order.total_price }}</p>
+                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="d-flex justify-content-end mt-4">
+                        <a href="{% url 'orders:manage_orders' %}" class="btn btn-outline-secondary me-2">Cancel</a>
+                        <button type="submit" class="btn btn-solid-shop">Save Status</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

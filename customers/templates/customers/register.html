@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body p-5">
+                <h3 class="fw-bold text-center mb-4" style="color: var(--color-text-main);">Create an Account</h3>
+                <form method="post">
+                    {% csrf_token %}
+                    <h5 class="text-muted mb-3">Account Information</h5>
+                    {{ user_form|crispy }}
+                    <hr class="my-4">
+                    <h5 class="text-muted mb-3">Profile Information</h5>
+                    {{ customer_form|crispy }}
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-solid-shop">Sign Up</button>
+                    </div>
+                </form>
+                <div class="text-center mt-4">
+                    <p class="mb-0">Already have an account? <a href="{% url 'customers:login' %}" class="text-decoration-none fw-bold">Login here</a>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

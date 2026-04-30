@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+@media (max-width: 767.98px) {
+    .mobile-clickable-row {
+        cursor: pointer;
+    }
+}
+</style>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <h2 class="fw-bold mb-0">Student Directory</h2>
+    <form class="d-flex flex-column flex-sm-row gap-2 w-100 typeahead-container position-relative" style="max-width: 500px;" method="get">
+        <div class="position-relative w-100 flex-grow-1">
+            <input type="text" name="q" class="form-control bg-light border-0 typeahead-input" placeholder="Search by name or ID..." value="{{ query }}" autocomplete="off" data-search-url="{% url 'customers:customer_search_api' %}">
+            <div class="typeahead-dropdown shadow rounded bg-white position-absolute w-100" style="display: none; top: 100%; left: 0; z-index: 1050; max-height: 350px; overflow-y: auto;">
+                <div class="d-flex justify-content-center p-4 typeahead-loader" style="display: none !important;">
+                    <div class="loader"></div>
+                </div>
+                <div class="typeahead-results text-start"></div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary-shop">Search</button>
+    </form>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Full Name</th>
+                        <th>Student ID</th>
+                        <th>Course</th>
+                        <th>Email</th>
+                        <th class="pe-4 text-end d-none d-md-table-cell">Manage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in customers %}
+                    <tr class="mobile-clickable-row" data-target-modal="customerModal{{ customer.user.id }}">
+                        <td class="ps-4 fw-medium">{{ customer.user.first_name }} {% if customer.middle_name %}{{ customer.middle_name }} {% endif %}{{ customer.user.last_name }}</td>
+                        <td>{{ customer.student_id|default:"-" }}</td>
+                        <td>{{ customer.course|default:"-" }}</td>
+                        <td>{{ customer.user.email }}</td>
+                        <td class="pe-4 text-end text-nowrap d-none d-md-table-cell">
+                            <a href="{% url 'customers:profile' %}?user={{ customer.user.id }}" class="btn btn-sm btn-outline-info me-1" title="View"><i class="fas fa-eye"></i></a>
+                            {% if user.is_staff %}
+                            <a href="{% url 'customers:profile' %}?user={{ customer.user.id }}" class="btn btn-sm btn-outline-primary me-1" title="Edit Profile"><i class="fas fa-user-edit"></i></a>
+                            <form action="{% url 'customers:delete_user' customer.user.id %}" method="post" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete User"><i class="fas fa-trash-alt"></i></button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    
+                    <!-- Mobile Modal for Customer {{ customer.user.id }} -->
+                    <div class="modal fade" id="customerModal{{ customer.user.id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-0 shadow">
+                                <div class="modal-header border-bottom-0 pb-0">
+                                    <h5 class="modal-title fw-bold">Student Details</h5>
+                                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body pt-2">
+                                    <div class="bg-light p-3 rounded mb-3">
+                                        <div class="row mb-2">
+                                            <div class="col-5 text-muted small text-uppercase fw-bold">Full Name</div>
+                                            <div class="col-7 text-end fw-medium">{{ customer.user.first_name }} {% if customer.middle_name %}{{ customer.middle_name }} {% endif %}{{ customer.user.last_name }}</div>
+                                        </div>
+                                        <div class="row mb-2">
+                                            <div class="col-5 text-muted small text-uppercase fw-bold">Student ID</div>
+                                            <div class="col-7 text-end fw-medium">{{ customer.student_id|default:"-" }}</div>
+                                        </div>
+                                        <div class="row mb-2">
+                                            <div class="col-5 text-muted small text-uppercase fw-bold">Course</div>
+                                            <div class="col-7 text-end fw-medium">{{ customer.course|default:"-" }}</div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-5 text-muted small text-uppercase fw-bold">Email</div>
+                                            <div class="col-7 text-end fw-medium text-break">{{ customer.user.email }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer d-flex justify-content-between align-items-center border-top-0 pt-0">
+                                    {% if user.is_staff %}
+                                    <form action="{% url 'customers:delete_user' customer.user.id %}" method="post" class="m-0">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-outline-danger rounded-pill btn-modal-secondary" title="Delete User">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <div></div>
+                                    {% endif %}
+                                    <div class="d-flex gap-2 flex-grow-1 justify-content-end">
+                                        {% if user.is_staff %}
+                                        <a href="{% url 'customers:profile' %}?user={{ customer.user.id }}" class="btn btn-outline-secondary rounded-pill btn-modal-secondary">Edit</a>
+                                        {% endif %}
+                                        <a href="{% url 'customers:profile' %}?user={{ customer.user.id }}" class="btn btn-primary-shop px-4">View Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">No customers registered yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const rows = document.querySelectorAll('.mobile-clickable-row');
+    rows.forEach(row => {
+        row.addEventListener('click', function(e) {
+            // Prevent triggering if clicking on an actual link
+            if (e.target.closest('a') || e.target.closest('button')) return;
+            
+            // Only trigger on mobile screens (< 768px)
+            if (window.innerWidth < 768) {
+                const modalId = this.getAttribute('data-target-modal');
+                if (modalId) {
+                    const modalEl = document.getElementById(modalId);
+                    if (modalEl) {
+                        const modal = new bootstrap.Modal(modalEl);
+                        modal.show();
+                    }
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

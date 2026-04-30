@@ -1,0 +1,446 @@
+/* Shopcart Theme CSS */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    --color-primary: #004b3b;
+    --color-primary-hover: #00382b;
+    --color-star: #00A95A;
+    --color-bg-light: #F5F6F8;
+    --color-text-main: #1D1D1D;
+    --color-text-muted: #767676;
+    --color-border: #E8E8E8;
+    --color-white: #FFFFFF;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--color-white);
+    color: var(--color-text-main);
+}
+
+/* Top Bar */
+.top-bar {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    font-size: 0.8rem;
+    padding: 0.5rem 0;
+}
+
+.top-bar a:not(.dropdown-item) {
+    color: var(--color-white);
+    text-decoration: none;
+}
+
+.top-bar .dropdown-item {
+    color: var(--color-text-main);
+}
+
+.top-bar .dropdown-item:hover {
+    color: var(--color-primary);
+    background-color: var(--color-bg-light);
+}
+
+/* Navbar */
+.navbar {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.brand-text {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    margin-left: 0.5rem;
+}
+
+.nav-links a:not(.dropdown-item) {
+    color: var(--color-text-main);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    margin: 0 1rem;
+    transition: color 0.2s;
+}
+
+.nav-links a:not(.dropdown-item):hover {
+    color: var(--color-primary);
+}
+
+/* Hover Dropdown */
+@media (min-width: 992px) {
+    .hover-dropdown:hover>.dropdown-menu {
+        display: block;
+        visibility: visible;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .hover-dropdown .dropdown-menu {
+        display: block;
+        visibility: hidden;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.3s ease;
+    }
+}
+
+.dropdown-toggle-hover:hover {
+    color: var(--color-primary) !important;
+}
+
+/* Mobile Category Menu */
+@media (max-width: 991.98px) {
+    .hover-dropdown .dropdown-menu {
+        display: block !important;
+        position: static !important;
+        box-shadow: none !important;
+        padding-left: 1rem;
+        border-left: 2px solid var(--color-border) !important;
+        margin-top: 1rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    .hover-dropdown .dropdown-menu li {
+        margin-bottom: 0.8rem;
+    }
+
+    .hover-dropdown .dropdown-menu li:last-child {
+        margin-bottom: 0;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .hover-dropdown>a>i {
+        display: none;
+    }
+}
+
+/* Search Bar */
+.search-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+}
+
+.search-input {
+    width: 100%;
+    border-radius: 50px;
+    background-color: var(--color-bg-light);
+    border: none;
+    padding: 0.6rem 2.5rem 0.6rem 1.2rem;
+    font-size: 0.9rem;
+}
+
+.search-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 75, 59, 0.2);
+}
+
+.search-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-muted);
+}
+
+/* Right Nav Icons */
+.nav-icon-link {
+    color: var(--color-text-main);
+    text-decoration: none;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.2s;
+}
+
+.nav-icon-link:hover {
+    color: var(--color-primary);
+}
+
+/* Filter Pills */
+.filter-pill {
+    background-color: var(--color-bg-light);
+    border: none;
+    border-radius: 50px;
+    padding: 0.5rem 1.2rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text-main);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s;
+    text-decoration: none;
+}
+
+.filter-pill:hover,
+.filter-pill.active {
+    background-color: #E2E4E8;
+    color: var(--color-text-main);
+}
+
+/* Product Card */
+.shop-card {
+    border: none;
+    border-radius: 12px;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.shop-card:hover {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+}
+
+.shop-card-img-wrap {
+    background-color: var(--color-bg-light);
+    border-radius: 12px;
+    height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 1.5rem;
+}
+
+.shop-card-img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.shop-card-heart {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    color: var(--color-text-muted);
+    background: var(--color-white);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.shop-card-heart:hover {
+    color: #ff4757;
+}
+
+.shop-card-body {
+    padding: 1rem 0;
+}
+
+.shop-card-title {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--color-text-main);
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.shop-card-desc {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.shop-card-stars {
+    color: var(--color-star);
+    font-size: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.shop-card-price {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+/* Buttons */
+.btn-primary-shop {
+    background-color: var(--color-white);
+    color: var(--color-text-main);
+    border: 1px solid var(--color-border);
+    border-radius: 50px;
+    padding: 0.4rem 1.2rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.btn-modal-secondary {
+    border-radius: 50px;
+    padding: 0.4rem 1.2rem !important;
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+}
+
+.btn-primary-shop:hover {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    border-color: var(--color-primary);
+}
+
+.btn-solid-shop {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    border: none;
+    border-radius: 50px;
+    padding: 0.6rem 2rem;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.btn-solid-shop:hover {
+    background-color: var(--color-primary-hover);
+    color: var(--color-white);
+}
+
+/* Banner Placeholder */
+.promo-banner {
+    background-color: var(--color-bg-light);
+    border-radius: 12px;
+    height: 300px;
+    width: 100%;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.promo-banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 2px rgba(0, 75, 59, 0.2);
+    border-color: var(--color-primary);
+}
+
+/* Hide number input spin buttons */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+input[type=number] { 
+  -moz-appearance: textfield; 
+}
+
+/* Cart Badge - perfectly circular */
+.cart-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50% !important;
+    font-size: 0.65rem;
+    padding: 0 !important;
+    line-height: 1;
+}
+
+/* Hover Cart Styles */
+.hover-cart-dropdown {
+    width: 320px;
+    padding: 0;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.hover-cart-header {
+    background-color: var(--color-bg-light);
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.hover-cart-items {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 0.5rem 0;
+}
+
+.hover-cart-item {
+    display: flex;
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.hover-cart-item:last-child {
+    border-bottom: none;
+}
+
+.hover-cart-item-img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    background-color: var(--color-bg-light);
+    margin-right: 1rem;
+}
+
+.hover-cart-item-details {
+    flex-grow: 1;
+}
+
+.hover-cart-item-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+    color: var(--color-text-main);
+    display: flex;
+    justify-content: space-between;
+}
+
+.hover-cart-item-price {
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
+.hover-cart-item-remove {
+    color: var(--color-text-muted);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.hover-cart-item-remove:hover {
+    color: #ff4757;
+}
+
+.hover-cart-footer {
+    padding: 1rem;
+    background-color: var(--color-bg-light);
+    border-top: 1px solid var(--color-border);
+}
+
+/* Scrollbar for hover cart items */
+.hover-cart-items::-webkit-scrollbar {
+    width: 6px;
+}
+.hover-cart-items::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+}
+.hover-cart-items::-webkit-scrollbar-thumb {
+    background: #c1c1c1; 
+    border-radius: 10px;
+}
+.hover-cart-items::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8; 
+}

@@ -1,0 +1,289 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+@media (max-width: 767.98px) {
+    .mobile-clickable-row {
+        cursor: pointer;
+    }
+}
+</style>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-5 border-bottom pb-4">
+    <div>
+        <h2 class="fw-bold" style="color: var(--color-primary);">Admin Dashboard</h2>
+        <p class="text-muted mb-0">High-level store analytics and management.</p>
+    </div>
+    <a href="{% url 'products:product_create' %}" class="btn btn-solid-shop align-self-start align-self-md-auto"><i class="fas fa-plus me-1"></i> Add Product</a>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 h-100" style="background-color: #f0f7f5;">
+            <div class="card-body p-4 text-center">
+                <i class="fas fa-boxes fs-1 mb-3" style="color: var(--color-primary);"></i>
+                <h5 class="fw-bold text-muted">Total Products</h5>
+                <h2 class="fw-bold">{{ products_count }}</h2>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 h-100" style="background-color: #f5f0f7;">
+            <div class="card-body p-4 text-center">
+                <i class="fas fa-users fs-1 mb-3 text-secondary"></i>
+                <h5 class="fw-bold text-muted">Registered Users</h5>
+                <h2 class="fw-bold">{{ users_count }}</h2>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 h-100" style="background-color: #f7f3f0;">
+            <div class="card-body p-4 text-center">
+                <i class="fas fa-shopping-bag fs-1 mb-3 text-warning"></i>
+                <h5 class="fw-bold text-muted">Total Orders</h5>
+                <h2 class="fw-bold">{{ orders_count }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h4 class="fw-bold mb-3 text-danger"><i class="fas fa-exclamation-triangle me-2"></i> Low Stock Alerts</h4>
+{% if low_stock_products %}
+<div class="card shadow-sm border-0">
+    <table class="table table-hover mb-0">
+        <thead class="table-light">
+            <tr>
+                <th class="ps-4">Product Name</th>
+                <th>Category</th>
+                <th>Current Stock</th>
+                <th class="text-end pe-4 d-none d-md-table-cell">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in low_stock_products %}
+            <tr class="mobile-clickable-row" data-target-modal="lowStockModal{{ item.id }}">
+                <td class="align-middle fw-medium ps-4">{{ item.name }}</td>
+                <td class="align-middle"><span class="badge bg-secondary">{{ item.category }}</span></td>
+                <td class="align-middle fw-bold text-danger">{{ item.stock }} remaining</td>
+                <td class="text-end align-middle pe-4 d-none d-md-table-cell">
+                    <a href="{% url 'products:product_update' item.id %}" class="btn btn-sm btn-outline-secondary">Update Stock</a>
+                </td>
+            </tr>
+            
+            <!-- Mobile Modal for Low Stock {{ item.id }} -->
+            <div class="modal fade" id="lowStockModal{{ item.id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header border-bottom-0 pb-0">
+                            <h5 class="modal-title fw-bold text-danger"><i class="fas fa-exclamation-triangle me-2"></i> Low Stock Alert</h5>
+                            <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body pt-2">
+                            <div class="bg-light p-3 rounded mb-3 border-start border-danger border-4">
+                                <div class="row mb-2">
+                                    <div class="col-5 text-muted small text-uppercase fw-bold">Product</div>
+                                    <div class="col-7 text-end fw-medium">{{ item.name }}</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-5 text-muted small text-uppercase fw-bold">Category</div>
+                                    <div class="col-7 text-end fw-medium">{{ item.category }}</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-5 text-muted small text-uppercase fw-bold">Current Stock</div>
+                                    <div class="col-7 text-end fw-bold text-danger">{{ item.stock }} remaining</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-top-0 pt-0">
+                            <a href="{% url 'products:product_update' item.id %}" class="btn btn-primary-shop w-100 rounded-pill">Update Stock</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p class="text-success"><i class="fas fa-check-circle me-1"></i> All products are well stocked.</p>
+{% endif %}
+
+<hr class="my-5">
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <h4 class="fw-bold mb-0">Products Management</h4>
+    <form id="admin-search-form" method="get" class="d-flex flex-column flex-sm-row gap-2 w-100 typeahead-container position-relative" style="max-width: 500px;">
+        <select name="category" class="form-select bg-light border-0" style="min-width: 130px;">
+            <option value="">All Categories</option>
+            {% for cat in categories %}
+            <option value="{{ cat }}" {% if current_category == cat %}selected{% endif %}>{{ cat }}</option>
+            {% endfor %}
+        </select>
+        <div class="position-relative w-100 flex-grow-1">
+            <input type="text" name="q" class="form-control bg-light border-0 typeahead-input" placeholder="Search a product..." value="{{ query }}" autocomplete="off" data-search-url="{% url 'products:product_search_api' %}">
+            <div class="typeahead-dropdown shadow rounded bg-white position-absolute w-100" style="display: none; top: 100%; left: 0; z-index: 1050; max-height: 350px; overflow-y: auto;">
+                <div class="d-flex justify-content-center p-4 typeahead-loader" style="display: none !important;">
+                    <div class="loader"></div>
+                </div>
+                <div class="typeahead-results text-start"></div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary-shop">Search</button>
+    </form>
+</div>
+
+<div class="card shadow-sm border-0 mb-5" id="products-table-container">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Product Name</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th class="text-end pe-4 d-none d-md-table-cell">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in all_products %}
+                    <tr class="mobile-clickable-row" data-target-modal="productModal{{ item.id }}">
+                        <td class="ps-4 fw-medium">{{ item.name }}</td>
+                        <td><span class="badge bg-secondary">{{ item.category }}</span></td>
+                        <td>₱ {{ item.price }}</td>
+                        <td>{{ item.stock }}</td>
+                        <td class="text-end pe-4 text-nowrap d-none d-md-table-cell">
+                            <a href="{% url 'products:product_detail' item.id %}" class="btn btn-sm btn-outline-info me-1" title="View"><i class="fas fa-eye"></i></a>
+                            <a href="{% url 'products:product_update' item.id %}" class="btn btn-sm btn-outline-primary me-1" title="Edit"><i class="fas fa-edit"></i></a>
+                            <a href="{% url 'products:product_delete' item.id %}" class="btn btn-sm btn-outline-danger" title="Remove"><i class="fas fa-trash-alt"></i></a>
+                        </td>
+                    </tr>
+                    
+                    <!-- Mobile Modal for Product {{ item.id }} -->
+                    <div class="modal fade" id="productModal{{ item.id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-0 shadow">
+                                <div class="modal-header border-bottom-0 pb-0">
+                                    <h5 class="modal-title fw-bold">Product Details</h5>
+                                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body pt-2">
+                                    <div class="bg-light p-3 rounded mb-3">
+                                        <div class="row mb-2">
+                                            <div class="col-5 text-muted small text-uppercase fw-bold">Product Name</div>
+                                            <div class="col-7 text-end fw-medium">{{ item.name }}</div>
+                                        </div>
+                                        <div class="row mb-2">
+                                            <div class="col-5 text-muted small text-uppercase fw-bold">Category</div>
+                                            <div class="col-7 text-end"><span class="badge bg-secondary">{{ item.category }}</span></div>
+                                        </div>
+                                        <div class="row mb-2">
+                                            <div class="col-5 text-muted small text-uppercase fw-bold">Price</div>
+                                            <div class="col-7 text-end fw-bold text-primary">₱ {{ item.price }}</div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-5 text-muted small text-uppercase fw-bold">Stock</div>
+                                            <div class="col-7 text-end fw-medium">{{ item.stock }} units</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer d-flex justify-content-between align-items-center border-top-0 pt-0">
+                                    <a href="{% url 'products:product_delete' item.id %}" class="btn btn-outline-danger rounded-pill btn-modal-secondary" title="Delete">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                    <div class="d-flex gap-2 flex-grow-1 justify-content-end">
+                                        <a href="{% url 'products:product_update' item.id %}" class="btn btn-outline-secondary rounded-pill btn-modal-secondary">Edit</a>
+                                        <a href="{% url 'products:product_detail' item.id %}" class="btn btn-primary-shop px-4">View</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">No products found matching your criteria.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Event Delegation for Mobile Rows
+    document.body.addEventListener('click', function(e) {
+        const row = e.target.closest('.mobile-clickable-row');
+        if (!row) return;
+        
+        // Prevent triggering if clicking on an actual link or button
+        if (e.target.closest('a') || e.target.closest('button')) return;
+        
+        // Only trigger on mobile screens (< 768px)
+        if (window.innerWidth < 768) {
+            const modalId = row.getAttribute('data-target-modal');
+            if (modalId) {
+                const modalEl = document.getElementById(modalId);
+                if (modalEl) {
+                    const modal = new bootstrap.Modal(modalEl);
+                    modal.show();
+                }
+            }
+        }
+    });
+
+    // 2. AJAX Search Form
+    const searchForm = document.getElementById('admin-search-form');
+    if (searchForm) {
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const url = new URL(this.action || window.location.href);
+            const formData = new FormData(this);
+            const searchParams = new URLSearchParams();
+            for (const pair of formData) {
+                if (pair[1]) searchParams.append(pair[0], pair[1]);
+            }
+            url.search = searchParams.toString();
+            
+            const tableContainer = document.getElementById('products-table-container');
+            if (tableContainer) {
+                tableContainer.style.opacity = '0.5';
+                tableContainer.style.transition = 'opacity 0.2s';
+            }
+            
+            window.history.pushState({}, '', url);
+            
+            fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newTable = doc.getElementById('products-table-container');
+                if (newTable && tableContainer) {
+                    tableContainer.innerHTML = newTable.innerHTML;
+                    tableContainer.style.opacity = '1';
+                }
+            })
+            .catch(err => {
+                console.error('Error fetching search results:', err);
+                if (tableContainer) tableContainer.style.opacity = '1';
+            });
+        });
+        
+        const categorySelect = searchForm.querySelector('select[name="category"]');
+        if (categorySelect) {
+            categorySelect.addEventListener('change', function() {
+                searchForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+            });
+        }
+    }
+});
+</script>
+
+{% endblock %}

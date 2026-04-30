@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col">
+        <h2 class="fw-bold mb-0" style="color: var(--color-text-main);">
+            <i class="fas fa-shopping-cart me-2" style="color: var(--color-primary);"></i> My Cart
+        </h2>
+    </div>
+</div>
+
+<form action="{% url 'orders:cart_checkout_page' %}" method="post" id="cart-form">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-0">
+                    {% if cart.items.count > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col" class="ps-4" style="width: 40px;">
+                                        <input class="form-check-input select-all-checkbox" type="checkbox" checked>
+                                    </th>
+                                    <th scope="col">Product</th>
+                                    <th scope="col" class="text-center">Price</th>
+                                    <th scope="col" class="text-center" style="width: 140px;">Quantity</th>
+                                    <th scope="col" class="text-center">Total</th>
+                                    <th scope="col" class="text-end pe-4">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in cart.items.all %}
+                                <tr>
+                                    <td class="ps-4">
+                                        <input class="form-check-input item-checkbox" type="checkbox" name="selected_items" value="{{ item.id }}" data-price="{{ item.get_total_price }}" checked>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            {% if item.product.image %}
+                                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="rounded me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="rounded me-3 bg-light d-flex justify-content-center align-items-center text-muted" style="width: 50px; height: 50px;">
+                                                    <i class="fas fa-image"></i>
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <h6 class="mb-0 fw-bold">{{ item.product.name }}</h6>
+                                                <small class="text-muted">{{ item.product.category }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">₱{{ item.product.price }}</td>
+                                    <td class="text-center">
+                                        <div class="d-flex align-items-center justify-content-center border rounded-pill mx-auto" style="width: max-content;">
+                                            <a href="{% url 'orders:update_cart_item' item.id 'decrease' %}" class="btn btn-sm px-3 py-1 border-0 bg-transparent shadow-none rounded-start-pill text-muted"><i class="fas fa-minus" style="font-size: 0.7rem;"></i></a>
+                                            <span class="px-2 text-center fw-bold" style="min-width: 30px;">{{ item.quantity }}</span>
+                                            {% if item.quantity < item.product.stock %}
+                                            <a href="{% url 'orders:update_cart_item' item.id 'increase' %}" class="btn btn-sm px-3 py-1 border-0 bg-transparent shadow-none rounded-end-pill text-muted"><i class="fas fa-plus" style="font-size: 0.7rem;"></i></a>
+                                            {% else %}
+                                            <button type="button" class="btn btn-sm px-3 py-1 border-0 bg-transparent shadow-none rounded-end-pill text-muted" style="opacity: 0.5;" disabled><i class="fas fa-plus" style="font-size: 0.7rem;"></i></button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td class="text-center fw-bold text-primary">₱{{ item.get_total_price }}</td>
+                                    <td class="text-end pe-4">
+                                        <a href="#" class="btn btn-outline-danger btn-sm rounded-pill px-3" title="Remove" onclick="event.preventDefault(); document.getElementById('remove-form-{{ item.id }}').submit();">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center p-5">
+                        <i class="fas fa-shopping-cart fa-4x text-muted mb-3 opacity-50"></i>
+                        <h4 class="text-muted mb-3">Your cart is empty</h4>
+                        <a href="{% url 'products:product_list' %}" class="btn btn-primary-shop">Browse Products</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold border-bottom pb-3 mb-4">Order Summary</h5>
+                    
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Subtotal (<span id="cart-item-count">0</span> items)</span>
+                        <span class="fw-bold" id="cart-subtotal">₱0.00</span>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mb-4">
+                        <span class="text-muted">Delivery</span>
+                        <span class="text-muted fw-bold">Calculated at checkout</span>
+                    </div>
+                    
+                    <hr class="mb-4">
+                    
+                    <div class="d-flex justify-content-between mb-4">
+                        <h5 class="fw-bold mb-0">Total</h5>
+                        <h5 class="fw-bold text-primary mb-0" id="cart-total">₱0.00</h5>
+                    </div>
+                    
+                    <button type="submit" id="checkout-btn" class="btn btn-solid-shop w-100 py-3" {% if cart.items.count == 0 %}disabled{% endif %}>
+                        <i class="fas fa-lock me-2"></i> Checkout Selected
+                    </button>
+                    
+                    <div class="text-center mt-3">
+                        <small class="text-muted"><i class="fas fa-info-circle me-1"></i> Delivery options available on next step.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+{% for item in cart.items.all %}
+<form id="remove-form-{{ item.id }}" action="{% url 'orders:remove_from_cart' item.id %}" method="post" class="d-none">
+    {% csrf_token %}
+</form>
+{% endfor %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const checkboxes = document.querySelectorAll('.item-checkbox');
+        const selectAllCheckbox = document.querySelector('.select-all-checkbox');
+        const subtotalElement = document.getElementById('cart-subtotal');
+        const totalElement = document.getElementById('cart-total');
+        const itemCountElement = document.getElementById('cart-item-count');
+        const checkoutBtn = document.getElementById('checkout-btn');
+
+        function updateTotals() {
+            let total = 0;
+            let count = 0;
+            let allChecked = true;
+            
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    total += parseFloat(cb.dataset.price);
+                    count += 1;
+                } else {
+                    allChecked = false;
+                }
+            });
+            
+            if (selectAllCheckbox) {
+                selectAllCheckbox.checked = (checkboxes.length > 0 && allChecked);
+            }
+            
+            if (subtotalElement) subtotalElement.textContent = '₱' + total.toFixed(2);
+            if (totalElement) totalElement.textContent = '₱' + total.toFixed(2);
+            if (itemCountElement) itemCountElement.textContent = count;
+            
+            if (checkoutBtn) checkoutBtn.disabled = (count === 0);
+        }
+
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', updateTotals);
+        });
+
+        if (selectAllCheckbox) {
+            selectAllCheckbox.addEventListener('change', function() {
+                checkboxes.forEach(cb => {
+                    cb.checked = selectAllCheckbox.checked;
+                });
+                updateTotals();
+            });
+        }
+        
+        // Initial calculation
+        updateTotals();
+    });
+</script>
+{% endblock %}

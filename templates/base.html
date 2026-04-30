@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en" style="scroll-behavior: smooth;">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduSupply Store</title>
+    
+    {% load static %}
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'img/Adobe Express - file.png' %}">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2.0">
+    <style>
+        /* Typeahead CSS */
+        .typeahead-dropdown .result-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--color-text-main);
+        }
+        .typeahead-dropdown .result-item:hover {
+            background-color: #f8f9fa;
+        }
+        .typeahead-dropdown .result-item:last-child {
+            border-bottom: none;
+        }
+
+        /* HTML: <div class="loader"></div> */
+        .loader {
+          width: 60px;
+          aspect-ratio: 2;
+          --_g: no-repeat radial-gradient(circle closest-side,#000 90%,#0000);
+          background: 
+            var(--_g) 0%   50%,
+            var(--_g) 50%  50%,
+            var(--_g) 100% 50%;
+          background-size: calc(100%/3) 50%;
+          animation: l3 1s infinite linear;
+        }
+        @keyframes l3 {
+            20%{background-position:0%   0%, 50%  50%,100%  50%}
+            40%{background-position:0% 100%, 50%   0%,100%  50%}
+            60%{background-position:0%  50%, 50% 100%,100%   0%}
+            80%{background-position:0%  50%, 50%  50%,100% 100%}
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Announcement Bar -->
+    <div class="top-bar d-none d-md-block position-relative" style="z-index: 1030;" id="topAnnouncementBar">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-phone-alt me-2"></i> 0916-256-0784
+            </div>
+            <div>
+                Welcome to EduSupply Store | <a href="{% url 'products:product_list' %}#products-section">Shop Now</a>
+            </div>
+            <div class="d-flex gap-3">
+                <div class="dropdown d-inline">
+                    <span class="cursor-pointer" data-bs-toggle="dropdown" aria-expanded="false" style="cursor:pointer;">
+                        <span id="langLabel">Eng</span> <i class="fas fa-chevron-down ms-1" style="font-size: 0.7em;"></i>
+                    </span>
+                    <ul class="dropdown-menu shadow border-0" style="min-width: 120px;">
+                        <li><a class="dropdown-item" href="#" onclick="changeLang('Eng', 'en'); event.preventDefault();">English</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="changeLang('日本語', 'ja'); event.preventDefault();">日本語</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="changeLang('Fil', 'tl'); event.preventDefault();">Filipino</a></li>
+                    </ul>
+                </div>
+                
+                <div class="dropdown d-inline">
+                    <span class="cursor-pointer" data-bs-toggle="dropdown" aria-expanded="false" style="cursor:pointer;">
+                        Location <i class="fas fa-chevron-down ms-1" style="font-size: 0.7em;"></i>
+                    </span>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-3 text-wrap" style="width: 250px;">
+                        <li>
+                            <p class="mb-0 text-muted" style="font-size: 0.85rem; line-height: 1.4;">
+                                <i class="fas fa-map-marker-alt" style="color: var(--color-primary);"></i> Philippine-Japan Friendship Highway. Sasa, Davao City. 8000 Davao del Sur. Philippines.
+                            </p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navbar -->
+    <nav class="navbar navbar-expand-lg bg-white sticky-top py-3">
+        <div class="container d-flex align-items-center justify-content-between flex-nowrap">
+            <!-- Brand -->
+            <a class="navbar-brand text-decoration-none d-flex align-items-center me-2 flex-shrink-0"
+                href="{% url 'products:product_list' %}">
+                <img src="{% static 'img/Adobe Express - file.png' %}" alt="Logo"
+                    style="height: 2.8rem; width: auto; object-fit: contain;">
+                <span class="brand-text ms-2 fw-bold" style="font-size: 1.1rem;">EduSupply</span>
+            </a>
+
+            <!-- Search Bar (Global) -->
+            <div class="search-container flex-grow-1 mx-2 position-relative typeahead-container" style="min-width: 0; max-width: 500px;">
+                <form action="{% url 'products:product_list' %}" method="get" class="m-0 position-relative">
+                    <input type="text" name="q" class="search-input w-100 typeahead-input" placeholder="Search..."
+                        value="{{ request.GET.q }}" style="padding-top: 0.4rem; padding-bottom: 0.4rem;"
+                        autocomplete="off" data-search-url="{% url 'products:product_search_api' %}">
+                    <i class="fas fa-search search-icon" style="top: 50%; transform: translateY(-50%);"></i>
+                    
+                    <div class="typeahead-dropdown shadow rounded bg-white position-absolute w-100" style="display: none; top: 100%; left: 0; z-index: 1050; max-height: 350px; overflow-y: auto;">
+                        <div class="d-flex justify-content-center p-4 typeahead-loader" style="display: none !important;">
+                            <div class="loader"></div>
+                        </div>
+                        <div class="typeahead-results"></div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Hamburger Toggler -->
+            <button class="navbar-toggler border-0 shadow-none px-0 ms-1 flex-shrink-0" type="button"
+                data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
+                <i class="fas fa-bars fs-3"></i>
+            </button>
+
+            <!-- Offcanvas Menu -->
+            <div class="offcanvas offcanvas-end flex-grow-1" tabindex="-1" id="offcanvasNavbar"
+                aria-labelledby="offcanvasNavbarLabel">
+                <div class="offcanvas-header border-bottom">
+                    <h5 class="offcanvas-title brand-text mb-0 fw-bold" id="offcanvasNavbarLabel"
+                        style="font-size: 1.1rem;">
+                        EduSupply</h5>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="offcanvas"
+                        aria-label="Close"></button>
+                </div>
+
+                <div class="offcanvas-body d-flex flex-column flex-lg-row align-items-lg-center w-100">
+                    
+                    <!-- Right side (Profile / Cart) -->
+                    <div
+                        class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center gap-4 mb-4 mb-lg-0 border-bottom border-lg-0 pb-4 pb-lg-0 order-first order-lg-last ms-lg-auto">
+                        {% if user.is_authenticated %}
+                        <div class="dropdown">
+                            <a href="#"
+                                class="nav-icon-link dropdown-toggle d-flex align-items-center text-nowrap gap-1"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="far fa-user fs-5"></i> Account
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-lg-end shadow border-0 mt-2">
+                                <li><a class="dropdown-item" href="{% url 'customers:profile' %}">Profile</a></li>
+                                <li><a class="dropdown-item" href="{% url 'products:wishlist_view' %}">My Wishlist</a></li>
+                                <li><a class="dropdown-item" href="{% url 'orders:order_history' %}">Order History</a></li>
+                                {% if user.customer.is_delivery_staff %}
+                                <li><a class="dropdown-item text-primary fw-bold" href="{% url 'orders:delivery_dashboard' %}">Delivery Portal</a></li>
+                                {% endif %}
+                                {% if user.is_staff %}
+                                <li><a class="dropdown-item" href="{% url 'customers:customer_list' %}">Student
+                                        Directory</a></li>
+                                {% endif %}
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <form method="post" action="{% url 'customers:logout' %}" class="m-0 p-0">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item text-danger">Logout</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="dropdown hover-dropdown" id="cart-dropdown-container">
+                            <a href="{% url 'orders:cart_view' %}" class="nav-icon-link position-relative dropdown-toggle-hover" aria-expanded="false">
+                                <i class="fas fa-shopping-cart fs-5"></i>
+                                {% if cart_item_count and cart_item_count > 0 %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge cart-badge bg-danger">
+                                    {{ cart_item_count }}
+                                </span>
+                                {% endif %}
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-lg-end hover-cart-dropdown shadow mt-0 fade-down p-0" id="hover-cart-content">
+                                {% include 'orders/hover_cart_partial.html' %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <a href="{% url 'customers:login' %}" class="nav-icon-link">
+                            <i class="far fa-user fs-5"></i> Account
+                        </a>
+                        <a href="{% url 'customers:register' %}" class="nav-icon-link">
+                            <i class="fas fa-user-plus fs-5"></i> Sign Up
+                        </a>
+                        {% endif %}
+                    </div>
+
+                    <!-- Links (Left) -->
+                    <div
+                        class="nav-links d-flex flex-column flex-lg-row align-items-start align-items-lg-center mb-4 mb-lg-0 order-last order-lg-first gap-3 gap-lg-4 me-lg-auto">
+
+                        <div class="dropdown mb-4 mb-lg-0 hover-dropdown">
+                            <a href="{% url 'products:product_list' %}"
+                                class="text-decoration-none dropdown-toggle-hover fw-medium d-flex align-items-center text-nowrap"
+                                style="color: var(--color-text-main);" aria-expanded="false">
+                                Categories <i class="fas fa-chevron-down ms-1" style="font-size: 0.7em;"></i>
+                            </a>
+                            <ul class="dropdown-menu border-0 shadow-sm mt-0 fade-down">
+                                <li><a class="dropdown-item" href="{% url 'products:product_list' %}">All Categories</a>
+                                </li>
+                                <li><a class="dropdown-item"
+                                        href="{% url 'products:product_list' %}?category=Notebooks">Notebooks</a></li>
+                                <li><a class="dropdown-item"
+                                        href="{% url 'products:product_list' %}?category=Writing">Writing
+                                        Instruments</a></li>
+                                <li><a class="dropdown-item" href="{% url 'products:product_list' %}?category=Bags">Bags
+                                        & Backpacks</a></li>
+                                <li><a class="dropdown-item" href="{% url 'products:product_list' %}?category=Art">Art
+                                        Supplies</a></li>
+                                <li><a class="dropdown-item"
+                                        href="{% url 'products:product_list' %}?category=Other">Other</a></li>
+                            </ul>
+                        </div>
+
+                        {% if user.is_staff %}
+                        <a href="{% url 'orders:manage_orders' %}" class="mb-4 mb-lg-0 text-nowrap">Orders</a>
+                        {% endif %}
+                        {% if user.is_superuser %}
+                        <a href="{% url 'admin_dashboard' %}"
+                            class="mb-4 mb-lg-0 text-primary fw-bold text-nowrap d-flex align-items-center"><i
+                                class="fas fa-chart-line me-1"></i> Manage</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show border-0 shadow-sm" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{% static 'js/main.js' %}?v=1.0"></script>
+    
+    <!-- Google Translate Script -->
+    <div id="google_translate_element" style="display: none;"></div>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({pageLanguage: 'en', autoDisplay: false}, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>
+</html>
