@@ -172,10 +172,10 @@ schoolsupply/
 ## Support
 
 **Group Members / Developers:**
-- Emmanuel Levinne Tecson
-- Neil Brian Molarte
-- Asiong Jared
-- Jared Lita Ponteveros
+- Emmanuel Levinne Tecson - UI & UX Designer
+- Neil Brian Molarte - Front-end Developer
+- Asiong Jared - Backend Developer
+- Jared Lita Ponteveros - Full-stack Developer
 
 ### Version History
 **Version 1.0 - Initial Release**
