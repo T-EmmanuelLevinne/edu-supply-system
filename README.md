@@ -2,12 +2,20 @@
 
 A comprehensive Django-based e-commerce platform for school supplies. Built with Django 6 and Bootstrap 5.
 
+## 👥 Group Members
+* **Emmanuel Levinne Tecson**
+* **Neil Brian Molarte**
+* **Asiong Jared**
+* **Jared Lita Ponteveros**
+
 ## Features
 - **3 Django Apps**: `products`, `customers`, and `orders`.
 - **User Roles**: Client (Customer), Staff, Admin.
-- **Client Sign Up**: Custom user registration linked to a Customer profile.
+- **Client Sign Up & Login**: Custom user registration linked to a Customer profile. Users can securely log in using either their **username** or **email address**, and the password fields include an interactive visibility toggle (eye icon).
 - **Clean UI**: Premium design inspired by modern e-commerce trends, using Bootstrap 5.
 - **CRUD Operations**: Complete Create, Read, Update, Delete flows for products, profiles, and orders.
+- **Smart Shopping Cart & Wishlist**: Hover-based cart preview, AJAX-powered Add/Remove functionality, and a seamless wishlist system.
+- **Delivery Management**: Dedicated dashboard for staff to track orders and update statuses.
 
 ## Setup Instructions
 
